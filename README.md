@@ -1,4 +1,4 @@
-# windblown-save-patcher
+# Windblown Save Patcher
 
 Small tool that sets MetaFlag bits in Windblown save files.
 Made to get Guinea Pig and Intern, both were limited rewards for demo and early access players.
