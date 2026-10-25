@@ -5,16 +5,23 @@ Made to get Guinea Pig and Intern, both were limited rewards for demo and early 
 
 ## How to use
 
+Install and create config:
+
+```
+python3 -m pip install --user .
+mkdir -p ~/.config/windblown-save-patcher
+cp config.example.yml ~/.config/windblown-save-patcher/config.yml
+```
+
+Put your save path into that config.
+
 Close game first.
 Game keeps save in memory and rewrites file on next save point, so patch made while game runs gets lost.
-
-Copy `config.example.yml` to `config.yml` and put your save path there.
 Then run:
 
 ```
-pipenv install
-pipenv run python -m windblown_save_patcher --dry-run
-pipenv run python -m windblown_save_patcher
+windblown-save-patcher --dry-run
+windblown-save-patcher
 ```
 
 Dry run only shows what would change.
@@ -24,11 +31,11 @@ If Steam Cloud asks about conflict on next launch, pick local copy.
 
 ## Config
 
-`config.yml` lives in project directory and git ignores it.
+Config lives in `~/.config/windblown-save-patcher/config.yml`, or under `$XDG_CONFIG_HOME` when it is set.
 
-- `saves` - list of save files. `~` works, relative paths start from project directory.
+- `saves` - list of save files. `~` works, relative paths start from config directory.
 - `flags` - flag name and bit number. Name goes only to log.
-- `backup_directory` - optional. Without it backups go to `backups` in project directory.
+- `backup_directory` - optional. Without it backups go to `~/.local/share/windblown-save-patcher/backups`, or under `$XDG_DATA_HOME` when it is set.
 
 With Proton saves live in `<steam library>/steamapps/compatdata/1911610/pfx/drive_c/users/steamuser/AppData/LocalLow/Motion Twin/Windblown/Steam_<steam id>/`.
 

@@ -4,13 +4,16 @@
 Load patcher configuration from YAML.
 """
 
+import collections.abc
 import dataclasses
+import os
 import pathlib
 
 import yaml
 
 from windblown_save_patcher import errors
 
+APPLICATION_NAME = "windblown-save-patcher"
 CONFIGURATION_KEYS = frozenset({"backup_directory", "flags", "saves"})
 BACKUP_DIRECTORY_NAME = "backups"
 CONFIGURATION_FILE_NAME = "config.yml"
@@ -30,34 +33,56 @@ class Configuration:
     backup_directory: pathlib.Path
 
 
-def windblown_save_patcher_project_directory() -> pathlib.Path:
+def windblown_save_patcher_xdg_directory(
+    environment: collections.abc.Mapping[str, str],
+    variable: str,
+    fallback: pathlib.Path,
+) -> pathlib.Path:
     """
-    Get directory holding package.
+    Get application directory under XDG base.
 
-    >>> (windblown_save_patcher_project_directory() / "windblown_save_patcher").is_dir()
-    True
+    >>> fallback = pathlib.Path("/f")
+    >>> windblown_save_patcher_xdg_directory({"XDG_DATA_HOME": "/data"}, "XDG_DATA_HOME", fallback)
+    PosixPath('/data/windblown-save-patcher')
+    >>> windblown_save_patcher_xdg_directory({"XDG_DATA_HOME": "data"}, "XDG_DATA_HOME", fallback)
+    PosixPath('/f/windblown-save-patcher')
     """
-    return pathlib.Path(__file__).resolve().parent.parent
-
-
-def windblown_save_patcher_backup_directory() -> pathlib.Path:
-    """
-    Get backups directory beside package.
-
-    >>> windblown_save_patcher_backup_directory().name
-    'backups'
-    """
-    return windblown_save_patcher_project_directory() / BACKUP_DIRECTORY_NAME
+    value = environment.get(variable)
+    if value is None or not pathlib.Path(value).is_absolute():
+        return fallback / APPLICATION_NAME
+    return pathlib.Path(value) / APPLICATION_NAME
 
 
 def windblown_save_patcher_configuration_path() -> pathlib.Path:
     """
-    Get config file beside package.
+    Get user config file path.
 
-    >>> windblown_save_patcher_configuration_path().name
-    'config.yml'
+    >>> path = windblown_save_patcher_configuration_path()
+    >>> path.parent.name, path.name
+    ('windblown-save-patcher', 'config.yml')
     """
-    return windblown_save_patcher_project_directory() / CONFIGURATION_FILE_NAME
+    configuration_directory = windblown_save_patcher_xdg_directory(
+        os.environ,
+        "XDG_CONFIG_HOME",
+        pathlib.Path.home() / ".config",
+    )
+    return configuration_directory / CONFIGURATION_FILE_NAME
+
+
+def windblown_save_patcher_backup_directory() -> pathlib.Path:
+    """
+    Get user backup directory.
+
+    >>> directory = windblown_save_patcher_backup_directory()
+    >>> directory.parent.name, directory.name
+    ('windblown-save-patcher', 'backups')
+    """
+    data_directory = windblown_save_patcher_xdg_directory(
+        os.environ,
+        "XDG_DATA_HOME",
+        pathlib.Path.home() / ".local" / "share",
+    )
+    return data_directory / BACKUP_DIRECTORY_NAME
 
 
 def windblown_save_patcher_resolve_path(text: str, base_directory: pathlib.Path) -> pathlib.Path:
@@ -191,7 +216,13 @@ def windblown_save_patcher_load_configuration(path: pathlib.Path) -> Configurati
     ...     windblown_save_patcher_load_configuration(path).flag_bits
     {'a': 1}
     """
-    document: object = yaml.safe_load(path.read_text(encoding="utf-8"))
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError as error:
+        raise errors.ConfigurationError(
+            "Config file not found. Please create it from config.example.yml."
+        ) from error
+    document: object = yaml.safe_load(text)
     return windblown_save_patcher_parse_configuration(
         document,
         path.resolve().parent,

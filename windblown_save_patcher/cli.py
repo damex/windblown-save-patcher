@@ -25,7 +25,8 @@ def windblown_save_patcher_parse_arguments(argv: list[str] | None) -> bool:
     True
     """
     parser = argparse.ArgumentParser(
-        description="Set MetaFlag bits in Windblown saves from config.yml in project directory.",
+        description="Set MetaFlag bits in Windblown saves listed in config.",
+        epilog=f"config: {config.windblown_save_patcher_configuration_path()}",
     )
     parser.add_argument(
         "--dry-run",
