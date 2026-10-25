@@ -7,8 +7,10 @@ name = "pypi"
 pyyaml = "*"
 
 [dev-packages]
+build = "*"
 mypy = "*"
 pylint = "*"
+twine = "*"
 types-pyyaml = "*"
 yamllint = "*"
 

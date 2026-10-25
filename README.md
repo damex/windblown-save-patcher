@@ -5,15 +5,22 @@ Made to get Guinea Pig and Intern, both were limited rewards for demo and early 
 
 ## How to use
 
-Install and create config:
+Install:
 
 ```
-python3 -m pip install --user .
-mkdir -p ~/.config/windblown-save-patcher
-cp config.example.yml ~/.config/windblown-save-patcher/config.yml
+python3 -m pip install --user windblown-save-patcher
 ```
 
-Put your save path into that config.
+Create `~/.config/windblown-save-patcher/config.yml` and put your save path there:
+
+```yaml
+---
+saves:
+  - /path/to/steamapps/compatdata/1911610/pfx/drive_c/users/steamuser/AppData/LocalLow/Motion Twin/Windblown/Steam_<steam id>/<player id>.sav
+flags:
+  demo: 91
+  super_early_access: 92
+```
 
 Close game first.
 Game keeps save in memory and rewrites file on next save point, so patch made while game runs gets lost.

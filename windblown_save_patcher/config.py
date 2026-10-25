@@ -220,7 +220,7 @@ def windblown_save_patcher_load_configuration(path: pathlib.Path) -> Configurati
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError as error:
         raise errors.ConfigurationError(
-            "Config file not found. Please create it from config.example.yml."
+            "Config file not found. Please create it as shown in README."
         ) from error
     document: object = yaml.safe_load(text)
     return windblown_save_patcher_parse_configuration(
